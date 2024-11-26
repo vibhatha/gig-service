@@ -8,12 +8,13 @@ import (
 	"GIG/app/services/authentication"
 	"GIG/app/services/entity_operations"
 	"errors"
-	"github.com/lsflk/gig-sdk/enums/ValueType"
-	"github.com/lsflk/gig-sdk/models"
-	"github.com/revel/revel"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/lsflk/gig-sdk/enums/ValueType"
+	"github.com/lsflk/gig-sdk/models"
+	"github.com/revel/revel"
 )
 
 type EntityEditController struct {
@@ -22,7 +23,7 @@ type EntityEditController struct {
 
 // swagger:operation POST /add Entity addUser
 //
-// Create Entity
+// # Create Entity
 //
 // This API allows to create/ modify a new/ existing entity
 //
@@ -32,30 +33,33 @@ type EntityEditController struct {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity object
-//   required: true
-//   schema:
-//       "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity object
+//     required: true
+//     schema:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) Create() revel.Result {
 	var (
 		entity models.Entity
@@ -82,7 +86,7 @@ func (c EntityEditController) Create() revel.Result {
 
 // swagger:operation POST /add-batch Entity add-batch
 //
-// Create a Set of Entities
+// # Create a Set of Entities
 //
 // This API allows to create/ modify a new/ set of entities
 //
@@ -92,32 +96,35 @@ func (c EntityEditController) Create() revel.Result {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity object array
-//   required: true
-//   schema:
-//       type: array
-//       items:
-//         "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity object array
+//     required: true
+//     schema:
+//     type: array
+//     items:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) CreateBatch() revel.Result {
 	var (
 		entitiesList []models.Entity
@@ -134,7 +141,11 @@ func (c EntityEditController) CreateBatch() revel.Result {
 
 		for _, e := range entities {
 			wg.Add(1)
+			// Go routine to add an entity
+			// This is basically allowing to add concurrent operations without blocking
+			// So a batch of entities are persisted in a synchronous manner.
 			go func(entity models.Entity) {
+				defer wg.Done() // Ensure Done is called to decrement the counter
 				_, err := repositories.EntityRepository{}.AddEntity(entity)
 				if err != nil {
 					log.Println(error_messages.EntityCreateError, err)
@@ -152,7 +163,7 @@ func (c EntityEditController) CreateBatch() revel.Result {
 
 // swagger:operation POST /terminate Entity terminate
 //
-// Terminate Entities
+// # Terminate Entities
 //
 // This API allows to terminate the lifetime of an existing entity. Include entity title to terminate specific entity or include categories to terminate set of entities by category.
 // source date and source attributes are required*.
@@ -163,30 +174,33 @@ func (c EntityEditController) CreateBatch() revel.Result {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity prototype
-//   required: true
-//   schema:
-//       "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity prototype
+//     required: true
+//     schema:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) TerminateEntities() revel.Result {
 	var (
 		entity models.Entity
@@ -217,9 +231,9 @@ func (c EntityEditController) TerminateEntities() revel.Result {
 
 // swagger:operation POST /delete Entity delete
 //
-// Delete Entity
+// # Delete Entity
 //
-// This API allows to delete existing entity
+// # This API allows to delete existing entity
 //
 // ---
 // produces:
@@ -227,30 +241,33 @@ func (c EntityEditController) TerminateEntities() revel.Result {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity object
-//   required: true
-//   schema:
-//       "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity object
+//     required: true
+//     schema:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) DeleteEntity() revel.Result {
 	var (
 		entity models.Entity
@@ -282,9 +299,9 @@ func (c EntityEditController) DeleteEntity() revel.Result {
 
 // swagger:operation POST /update Entity update
 //
-// Update Entity
+// # Update Entity
 //
-// This API allows to modify existing entity
+// # This API allows to modify existing entity
 //
 // ---
 // produces:
@@ -292,30 +309,33 @@ func (c EntityEditController) DeleteEntity() revel.Result {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity object
-//   required: true
-//   schema:
-//       "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity object
+//     required: true
+//     schema:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) UpdateEntity() revel.Result {
 
 	type Payload struct {
@@ -369,9 +389,9 @@ func (c EntityEditController) UpdateEntity() revel.Result {
 
 // swagger:operation POST /append Entity append
 //
-// Append to Entity
+// # Append to Entity
 //
-// This API allows to modify existing entity
+// # This API allows to modify existing entity
 //
 // ---
 // produces:
@@ -379,30 +399,33 @@ func (c EntityEditController) UpdateEntity() revel.Result {
 //
 // parameters:
 //
-// - name: entity
-//   in: body
-//   description: entity object
-//   required: true
-//   schema:
-//       "$ref": "#/definitions/Entity"
+//   - name: entity
+//     in: body
+//     description: entity object
+//     required: true
+//     schema:
+//     "$ref": "#/definitions/Entity"
 //
 // security:
 //   - Bearer: []
 //   - ApiKey: []
 //
 // responses:
-//   '200':
-//     description: entity created/ modified
-//     schema:
-//         "$ref": "#/definitions/Response"
-//   '403':
-//     description: input validation error
-//     schema:
-////       "$ref": "#/definitions/Response"
-//   '500':
-//     description: server error
-//     schema:
-//       "$ref": "#/definitions/Response"
+//
+//	'200':
+//	  description: entity created/ modified
+//	  schema:
+//	      "$ref": "#/definitions/Response"
+//	'403':
+//	  description: input validation error
+//	  schema:
+//
+// //       "$ref": "#/definitions/Response"
+//
+//	'500':
+//	  description: server error
+//	  schema:
+//	    "$ref": "#/definitions/Response"
 func (c EntityEditController) AppendToEntity() revel.Result {
 
 	var (
