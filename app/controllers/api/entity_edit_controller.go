@@ -136,26 +136,24 @@ func (c EntityEditController) CreateBatch() revel.Result {
 		return c.RenderJSON(controllers.BuildErrorResponse(err, 403))
 	}
 
-	go func(entities []models.Entity) {
-		wg := &sync.WaitGroup{}
+	wg := &sync.WaitGroup{}
 
-		for _, e := range entities {
-			wg.Add(1)
-			// Go routine to add an entity
-			// This is basically allowing to add concurrent operations without blocking
-			// So a batch of entities are persisted in a synchronous manner.
-			go func(entity models.Entity) {
-				defer wg.Done() // Ensure Done is called to decrement the counter
-				_, err := repositories.EntityRepository{}.AddEntity(entity)
-				if err != nil {
-					log.Println(error_messages.EntityCreateError, err)
-				}
-			}(e)
+	for _, e := range entitiesList {
+		wg.Add(1)
+		// Go routine to add an entity
+		// This is basically allowing to add concurrent operations without blocking
+		// So a batch of entities are persisted in a synchronous manner.
+		go func(entity models.Entity) {
+			defer wg.Done() // Ensure Done is called to decrement the counter
+			_, err := repositories.EntityRepository{}.AddEntity(entity)
+			if err != nil {
+				log.Println(error_messages.EntityCreateError, err)
+			}
+		}(e)
 
-		}
+	}
 
-		wg.Wait()
-	}(entitiesList)
+	wg.Wait()
 
 	c.Response.Status = 200
 	return c.RenderJSON(controllers.BuildSuccessResponse(info_messages.EntityCreateBatchQueued, 200))

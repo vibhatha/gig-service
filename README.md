@@ -87,3 +87,7 @@ Configure mongo.path at conf/app.conf using the mongodb and minio IPs. Refer [Ho
 * The [Revel guides](http://revel.github.io/manual/index.html).
 * The [Revel sample apps](http://revel.github.io/examples/index.html).
 * The [Revel API documentation](https://godoc.org/github.com/revel/revel).
+
+## Special Notes
+
+This version of GIG doesn't concurrently execute entity edits. This is because the entity edit controller doesn't have any locks to prevent race conditions or concurrent writes to the database. Guaranteeing atomicity at the entity level is a work in progress.
